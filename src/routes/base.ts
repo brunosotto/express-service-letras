@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { ProjectRoute } from './project/project.route';
-import { UserInfoRoute } from './user-info/user-info.route';
+import { TextRoute } from './text/text.route';
 import { RunDeployRoute } from './run-deploy/run-deploy.route';
 import { NOT_FOUND } from 'http-status-codes';
 
@@ -12,8 +12,8 @@ const router = Router();
 router.use('/project', ProjectRoute.singular);
 router.use('/projects', ProjectRoute.plural);
 
-// user-info
-router.use('/user-info', UserInfoRoute);
+// text
+router.use('/text', TextRoute);
 
 // run-deploy
 router.use('/run-deploy', RunDeployRoute);
