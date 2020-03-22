@@ -55,6 +55,8 @@ body.end {
     1px -1px 0 #000,
     -1px 1px 0 #000;
   color: #fff;
-  font-family: monospace;
+  font-family: sans-serif;
   text-transform: uppercase;
+  font-style: italic;
+  letter-spacing: 0.1rem;
 }

@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { ProjectRoute } from './project/project.route';
+import { ConfigRoute } from './config-router/config.router';
 import { TextRoute } from './text/text.route';
 import { RunDeployRoute } from './run-deploy/run-deploy.route';
 import { NOT_FOUND } from 'http-status-codes';
@@ -11,6 +12,10 @@ const router = Router();
 // project
 router.use('/project', ProjectRoute.singular);
 router.use('/projects', ProjectRoute.plural);
+
+// project
+router.use('/config', ConfigRoute.singular);
+router.use('/configs', ConfigRoute.plural);
 
 // text
 router.use('/text', TextRoute);

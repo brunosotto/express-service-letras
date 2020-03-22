@@ -4,7 +4,7 @@ import fs from 'fs';
 
 export class FileDao {
 
-  private readonly dbFilePath = '../EasyCi-DB.json';
+  private readonly dbFilePath = '../ServidorLetras-BD.json';
 
   private openDb(): Promise<any> {
     this.checkFile();
