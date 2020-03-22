@@ -122,7 +122,7 @@ singular.post(addConfigPath, async (req: Request, res: Response) => {
   return res.status(CREATED).json(response);
 });
 
-function validateRecivedConfig(config: Config): boolean {
+export function validateRecivedConfig(config: Config): boolean {
   if (!config.pad && config.pad !== 0) {
     return false;
   } else if (!config.size && config.size !== 0) {
