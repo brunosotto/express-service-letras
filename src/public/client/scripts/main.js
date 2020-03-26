@@ -2,7 +2,8 @@ var animabanners = (function ($) {
     "use strict";
 
     function show(data) {
-        $("#message").text(data.text);
+        data.text = data.text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+        $("#message").html(data.text);
 
         // tamanho do texto
         if (data.size) {
