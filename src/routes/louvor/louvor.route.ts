@@ -1,6 +1,6 @@
 import { logger } from './../../shared/logger';
-import { ProjectDao } from './../../daos/project/project.dao';
-import { Project } from './../../models/project.model';
+import { LouvorDao } from './../../daos/louvor/louvor.dao';
+import { Louvor } from './../../models/louvor.model';
 import { IResponse } from './../../models/response.model';
 import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
@@ -8,40 +8,30 @@ import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 // Init shared
 const singular = Router();
 const plural = Router();
-const projectDao = new ProjectDao();
+const louvorDao = new LouvorDao();
 export const paramMissingError = 'One or more of the required parameters was missing.';
 
 // Init routes
-export const getProjectsPath = ''; // raíz
-export const getProjectPath = '/:id';
-export const addProjectPath = '';
-export const updateProjectPath = '/:id';
-export const deleteProjectPath = '/:id';
+export const getLouvoresPath = ''; // raíz
+export const getLouvorPath = '/:id';
+export const addLouvorPath = '';
+export const updateLouvorPath = '/:id';
+export const deleteLouvorPath = '/:id';
 
 /******************************************************************************
- *                      Get All Projects - "GET /api/projects"
+ *                      Get All Louvores - "GET /api/louvores"
  ******************************************************************************/
-plural.get(getProjectsPath, async (req: Request, res: Response) => {
+plural.get(getLouvoresPath, async (req: Request, res: Response) => {
   try {
-    const projects = await projectDao.getAll();
+    const louvores = await louvorDao.getAll();
 
-    // remove os logs dos envs
-    const filtered = projects.map((project) => {
-      project.deploymentEnvs = project.deploymentEnvs.map((env) => {
-        env.lastLog = null;
-        return env;
-      });
-
-      return project;
-    });
-
-    return res.status(OK).json(filtered);
+    return res.status(OK).json(louvores);
   } catch (err) {
     // loga
     logger.error(err.message, err);
 
     // prepara o responde
-    const response: IResponse = { success: false, message: err.message, type: 'ErrorListProjects' };
+    const response: IResponse = { success: false, message: err.message, type: 'ErrorListLouvores' };
 
     // retorna
     return res.status(BAD_REQUEST).json(response);
@@ -49,50 +39,44 @@ plural.get(getProjectsPath, async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
- *                      Get One Project - "GET /api/project/{id}"
+ *                      Get One Louvor - "GET /api/louvor/{id}"
  ******************************************************************************/
-singular.get(getProjectPath, async (req: Request, res: Response) => {
+singular.get(getLouvorPath, async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const project = await getProject(id);
+    const louvor = await getLouvor(id);
 
-    // remove os logs dos envs
-    project.deploymentEnvs = project.deploymentEnvs.map((env) => {
-      env.lastLog = null;
-      return env;
-    });
-
-    return res.status(OK).json(project);
+    return res.status(OK).json(louvor);
   } catch (err) {
     // loga
     logger.error(err.message, err);
 
     // prepara o responde
-    const response: IResponse = { success: false, message: err.message, type: 'ErrorGetProject' };
+    const response: IResponse = { success: false, message: err.message, type: 'ErrorGetLouvor' };
 
     // retorna
     return res.status(BAD_REQUEST).json(response);
   }
 });
 
-const getProject = (id: string) => {
-  return projectDao.get(id);
+const getLouvor = (id: string) => {
+  return louvorDao.get(id);
 };
 
 /******************************************************************************
- *                       Add One - "POST /api/project"
+ *                       Add One - "POST /api/louvor"
  ******************************************************************************/
-singular.post(addProjectPath, async (req: Request, res: Response) => {
+singular.post(addLouvorPath, async (req: Request, res: Response) => {
   try {
-    const project = new Project(req.body);
+    const louvor = new Louvor(req.body);
 
     // valida os parametros requeridos
-    if (!validateRecivedProject(project)) {
+    if (!validateRecivedLouvor(louvor)) {
       throw { message: paramMissingError };
     }
 
     // grava e já recebe o id
-    const id = await projectDao.add(project);
+    const id = await louvorDao.add(louvor);
 
     // prepara o responde
     const response: IResponse = { id, success: true };
@@ -103,19 +87,17 @@ singular.post(addProjectPath, async (req: Request, res: Response) => {
     logger.error(err.message, err);
 
     // prepara o responde
-    const response: IResponse = { success: false, message: err.message, type: 'ErrorAddProject' };
+    const response: IResponse = { success: false, message: err.message, type: 'ErrorAddLouvor' };
 
     // retorna
     return res.status(BAD_REQUEST).json(response);
   }
 });
 
-function validateRecivedProject(project: Project): boolean {
-  if (!project.name) {
+function validateRecivedLouvor(louvor: Louvor): boolean {
+  if (!louvor.name) {
     return false;
-  } else if (!project.deploymentEnvs) {
-    return false;
-  } else if (project.deploymentEnvs.length === 0) {
+  } else if (!louvor.text) {
     return false;
   } else {
     return true;
@@ -123,22 +105,22 @@ function validateRecivedProject(project: Project): boolean {
 }
 
 /******************************************************************************
- *                       Update - "PUT /api/project/{id}"
+ *                       Update - "PUT /api/louvor/{id}"
  ******************************************************************************/
-singular.put(updateProjectPath, async (req: Request, res: Response) => {
+singular.put(updateLouvorPath, async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const project = new Project(req.body);
+    const louvor = new Louvor(req.body);
 
     // valida os parametros requeridos
-    if (!validateRecivedProject(project)) {
+    if (!validateRecivedLouvor(louvor)) {
       throw { message: paramMissingError };
     }
 
     // injeta o id
-    project.id = id;
+    louvor.id = id;
 
-    await updateProject(project);
+    await updateLouvor(louvor);
 
     // prepara o responde
     const response: IResponse = { success: true };
@@ -150,24 +132,24 @@ singular.put(updateProjectPath, async (req: Request, res: Response) => {
     logger.error(err.message, err);
 
     // prepara o responde
-    const response: IResponse = { success: false, message: err.message, type: 'ErrorUpdateProject' };
+    const response: IResponse = { success: false, message: err.message, type: 'ErrorUpdateLouvor' };
 
     // retorna
     return res.status(BAD_REQUEST).json(response);
   }
 });
 
-const updateProject = (project: Project) => {
-  return projectDao.update(project);
+const updateLouvor = (louvor: Louvor) => {
+  return louvorDao.update(louvor);
 };
 
 /******************************************************************************
- *                    Delete - "DELETE /api/project/:id"
+ *                    Delete - "DELETE /api/louvor/:id"
  ******************************************************************************/
-singular.delete(deleteProjectPath, async (req: Request, res: Response) => {
+singular.delete(deleteLouvorPath, async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    await projectDao.delete(id);
+    await louvorDao.delete(id);
 
     // prepara o responde
     const response: IResponse = { success: true };
@@ -179,7 +161,7 @@ singular.delete(deleteProjectPath, async (req: Request, res: Response) => {
     logger.error(err.message, err);
 
     // prepara o responde
-    const response: IResponse = { success: false, message: err.message, type: 'ErrorDeleteProject' };
+    const response: IResponse = { success: false, message: err.message, type: 'ErrorDeleteLouvor' };
 
     // retorna
     return res.status(BAD_REQUEST).json(response);
@@ -189,9 +171,9 @@ singular.delete(deleteProjectPath, async (req: Request, res: Response) => {
 /******************************************************************************
  *                                     Export
  ******************************************************************************/
-export const ProjectRoute = {
+export const LouvorRoute = {
   singular,
   plural,
-  getProject,
-  updateProject,
+  getLouvor,
+  updateLouvor,
 };

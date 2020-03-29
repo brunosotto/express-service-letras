@@ -1,28 +1,28 @@
 import { pErr } from './../../shared/misc';
-import { ProjectDao } from './../../daos/project/project.dao';
-import { Project, IProject } from './../../models/project.model';
+import { LouvorDao } from './../../daos/louvor/louvor.dao';
+import { Louvor, ILouvor } from './../../models/louvor.model';
 import supertest from 'supertest';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { Response, SuperTest, Test } from 'supertest';
 import app from '../../server';
 import {
-  getProjectPath,
-  getProjectsPath,
-  addProjectPath,
-  updateProjectPath,
-  deleteProjectPath,
+  getLouvorPath,
+  getLouvoresPath,
+  addLouvorPath,
+  updateLouvorPath,
+  deleteLouvorPath,
   paramMissingError,
-} from './project.route';
+} from './louvor.route';
 
-describe('Project Routes', () => {
+describe('Louvor Routes', () => {
 
-  const projectPluralPath = '/api/projects';
-  const projectSingularPath = '/api/project';
-  const getProjectsFullPath = projectPluralPath + getProjectsPath;
-  const getProjectFullPath = projectSingularPath + getProjectPath;
-  const addProjectFullPath = projectSingularPath + addProjectPath;
-  const updateProjectFullPath = projectSingularPath + updateProjectPath;
-  const deleteProjectFullPath = projectSingularPath + deleteProjectPath;
+  const louvorPluralPath = '/api/louvores';
+  const louvorSingularPath = '/api/louvor';
+  const getLouvoresFullPath = louvorPluralPath + getLouvoresPath;
+  const getLouvorFullPath = louvorSingularPath + getLouvorPath;
+  const addLouvorFullPath = louvorSingularPath + addLouvorPath;
+  const updateLouvorFullPath = louvorSingularPath + updateLouvorPath;
+  const deleteLouvorFullPath = louvorSingularPath + deleteLouvorPath;
 
   let agent: SuperTest<Test>;
 
@@ -31,64 +31,46 @@ describe('Project Routes', () => {
     done();
   });
 
-  describe(`"GET:${getProjectsFullPath}"`, () => {
+  describe(`"GET:${getLouvoresFullPath}"`, () => {
 
     const callApi = () => {
-      return agent.get(getProjectsFullPath);
+      return agent.get(getLouvoresFullPath);
     };
 
-    it(`should return a JSON object with all the projects and a status code of "${OK}" if the
+    it(`should return a JSON object with all the louvores and a status code of "${OK}" if the
             request was successful.`, (done) => {
 
-      const projects: Project[] = [
+      const louvores: Louvor[] = [
         {
           id: 'aa1',
-          name: 'Projecto 1',
-          enable: true,
-          script: 'express',
-          deploymentPath: '/teste/',
-          lastRun: new Date(),
-          deploymentEnvs: [],
-          githubRepoUrl: 'teste.git',
-          authToken: '12334ddss',
+          name: 'Louvoro 1',
+          text: '12334ddss',
         },
         {
           id: 'aa2',
-          name: 'Projecto 2',
-          enable: true,
-          script: 'express',
-          deploymentPath: '/teste/',
-          lastRun: new Date(),
-          deploymentEnvs: [],
-          githubRepoUrl: 'teste.git',
-          authToken: '12334ddss',
+          name: 'Louvoro 2',
+          text: '12334ddss',
         },
         {
           id: 'aa3',
-          name: 'Projecto 3',
-          enable: true,
-          script: 'express',
-          deploymentPath: '/teste/',
-          lastRun: new Date(),
-          deploymentEnvs: [],
-          githubRepoUrl: 'teste.git',
-          authToken: '12334ddss',
+          name: 'Louvoro 3',
+          text: '12334ddss',
         },
       ];
 
-      spyOn(ProjectDao.prototype, 'getAll').and.returnValue(Promise.resolve(projects));
+      spyOn(LouvorDao.prototype, 'getAll').and.returnValue(Promise.resolve(louvores));
 
       callApi()
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(OK);
 
-          // Caste instance-objects to 'Project' objects
-          const retProjects = res.body.map((project: IProject) => {
-            return new Project(project);
+          // Caste instance-objects to 'Louvor' objects
+          const retLouvores = res.body.map((louvor: ILouvor) => {
+            return new Louvor(louvor);
           });
 
-          expect(JSON.stringify(retProjects)).toEqual(JSON.stringify(projects));
+          expect(JSON.stringify(retLouvores)).toEqual(JSON.stringify(louvores));
           expect(res.body.message).toBeUndefined();
           done();
         });
@@ -97,8 +79,8 @@ describe('Project Routes', () => {
     it(`should return a JSON object containing an error message and a status code of
             "${BAD_REQUEST}" if the request was unsuccessful.`, (done) => {
 
-      const errMsg = 'Could not fetch projects.';
-      spyOn(ProjectDao.prototype, 'getAll').and.throwError(errMsg);
+      const errMsg = 'Could not fetch louvores.';
+      spyOn(LouvorDao.prototype, 'getAll').and.throwError(errMsg);
 
       callApi()
         .end((err: Error, res: Response) => {
@@ -110,38 +92,32 @@ describe('Project Routes', () => {
     });
   });
 
-  describe(`"GET:${getProjectFullPath}"`, () => {
+  describe(`"GET:${getLouvorFullPath}"`, () => {
 
     const callApi = (id: string) => {
-      return agent.get(getProjectFullPath.replace(':id', id.toString()));
+      return agent.get(getLouvorFullPath.replace(':id', id.toString()));
     };
 
-    it(`should return a JSON object with all the projects and a status code of "${OK}" if the
+    it(`should return a JSON object with all the louvores and a status code of "${OK}" if the
             request was successful.`, (done) => {
 
-      const project: Project = {
+      const louvor: Louvor = {
         id: 'aa1',
-        name: 'Projecto 1',
-        enable: true,
-        script: 'express',
-        deploymentPath: '/teste/',
-        lastRun: new Date(),
-        deploymentEnvs: [],
-        githubRepoUrl: 'teste.git',
-        authToken: '12334ddss',
+        name: 'Louvoro 1',
+        text: '12334ddss',
       };
 
-      spyOn(ProjectDao.prototype, 'get').and.returnValue(Promise.resolve(project));
+      spyOn(LouvorDao.prototype, 'get').and.returnValue(Promise.resolve(louvor));
 
       callApi('aa1')
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(OK);
 
-          // Caste instance-objects to 'Project' objects
-          const retProject = new Project(res.body);
+          // Caste instance-objects to 'Louvor' objects
+          const retLouvor = new Louvor(res.body);
 
-          expect(JSON.stringify(retProject)).toEqual(JSON.stringify(project));
+          expect(JSON.stringify(retLouvor)).toEqual(JSON.stringify(louvor));
           expect(res.body.message).toBeUndefined();
           done();
         });
@@ -150,8 +126,8 @@ describe('Project Routes', () => {
     it(`should return a JSON object containing an error message and a status code of
             "${BAD_REQUEST}" if the request was unsuccessful.`, (done) => {
 
-      const errMsg = 'Could not fetch projects.';
-      spyOn(ProjectDao.prototype, 'get').and.throwError(errMsg);
+      const errMsg = 'Could not fetch louvores.';
+      spyOn(LouvorDao.prototype, 'get').and.throwError(errMsg);
 
       callApi('aa1')
         .end((err: Error, res: Response) => {
@@ -163,35 +139,22 @@ describe('Project Routes', () => {
     });
   });
 
-  describe(`"POST:${addProjectFullPath}"`, () => {
+  describe(`"POST:${addLouvorFullPath}"`, () => {
 
     const callApi = (reqBody: object) => {
-      return agent.post(addProjectFullPath).type('form').send(reqBody);
+      return agent.post(addLouvorFullPath).type('form').send(reqBody);
     };
 
-    const projectData = new Project(
+    const louvorData = new Louvor(
       'Projeto novo',
-      true,
-      'express',
-      '/teste/',
-      new Date(),
-      [
-        {
-          name: 'teste',
-          port: 1234,
-          lastDeploy: new Date(),
-          versions: [],
-        },
-      ],
-      'teste.git',
       '12334ddss',
     );
 
     it(`should return a status code of "${CREATED}" if the request was successful.`, (done) => {
 
-      spyOn(ProjectDao.prototype, 'add').and.returnValue(Promise.resolve(''));
+      spyOn(LouvorDao.prototype, 'add').and.returnValue(Promise.resolve(''));
 
-      callApi(projectData) // pick up here
+      callApi(louvorData) // pick up here
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(CREATED);
@@ -201,7 +164,7 @@ describe('Project Routes', () => {
     });
 
     it(`should return a JSON object with an error message of "${paramMissingError}" and a status
-            code of "${BAD_REQUEST}" if the project param was missing.`, (done) => {
+            code of "${BAD_REQUEST}" if the louvor param was missing.`, (done) => {
 
       callApi({})
         .end((err: Error, res: Response) => {
@@ -215,10 +178,10 @@ describe('Project Routes', () => {
     it(`should return a JSON object with an error message and a status code of "${BAD_REQUEST}"
             if the request was unsuccessful.`, (done) => {
 
-      const errMsg = 'Could not add project.';
-      spyOn(ProjectDao.prototype, 'add').and.throwError(errMsg);
+      const errMsg = 'Could not add louvor.';
+      spyOn(LouvorDao.prototype, 'add').and.throwError(errMsg);
 
-      callApi(projectData)
+      callApi(louvorData)
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(BAD_REQUEST);
@@ -228,35 +191,22 @@ describe('Project Routes', () => {
     });
   });
 
-  describe(`"PUT:${updateProjectFullPath}"`, () => {
+  describe(`"PUT:${updateLouvorFullPath}"`, () => {
 
     const callApi = (id: string, reqBody: object) => {
-      return agent.put(updateProjectFullPath.replace(':id', id.toString())).type('form').send(reqBody);
+      return agent.put(updateLouvorFullPath.replace(':id', id.toString())).type('form').send(reqBody);
     };
 
-    const projectData = new Project(
+    const louvorData = new Louvor(
       'Projeto novo',
-      true,
-      'express',
-      '/teste/',
-      new Date(),
-      [
-        {
-          name: 'teste',
-          port: 1234,
-          lastDeploy: new Date(),
-          versions: [],
-        },
-      ],
-      'teste.git',
       '12334ddss',
     );
 
     it(`should return a status code of "${OK}" if the request was successful.`, (done) => {
 
-      spyOn(ProjectDao.prototype, 'update').and.returnValue(Promise.resolve());
+      spyOn(LouvorDao.prototype, 'update').and.returnValue(Promise.resolve());
 
-      callApi('aa1', projectData)
+      callApi('aa1', louvorData)
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(OK);
@@ -266,7 +216,7 @@ describe('Project Routes', () => {
     });
 
     it(`should return a JSON object with an error message of "${paramMissingError}" and a
-            status code of "${BAD_REQUEST}" if the project param was missing.`, (done) => {
+            status code of "${BAD_REQUEST}" if the louvor param was missing.`, (done) => {
 
       callApi('aa2', {})
         .end((err: Error, res: Response) => {
@@ -280,10 +230,10 @@ describe('Project Routes', () => {
     it(`should return a JSON object with an error message and a status code of "${BAD_REQUEST}"
             if the request was unsuccessful.`, (done) => {
 
-      const updateErrMsg = 'Could not update project.';
-      spyOn(ProjectDao.prototype, 'update').and.throwError(updateErrMsg);
+      const updateErrMsg = 'Could not update louvor.';
+      spyOn(LouvorDao.prototype, 'update').and.throwError(updateErrMsg);
 
-      callApi('aa3', projectData)
+      callApi('aa3', louvorData)
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(BAD_REQUEST);
@@ -293,15 +243,15 @@ describe('Project Routes', () => {
     });
   });
 
-  describe(`"DELETE:${deleteProjectFullPath}"`, () => {
+  describe(`"DELETE:${deleteLouvorFullPath}"`, () => {
 
     const callApi = (id: string) => {
-      return agent.delete(deleteProjectFullPath.replace(':id', id.toString()));
+      return agent.delete(deleteLouvorFullPath.replace(':id', id.toString()));
     };
 
     it(`should return a status code of "${OK}" if the request was successful.`, (done) => {
 
-      spyOn(ProjectDao.prototype, 'delete').and.returnValue(Promise.resolve());
+      spyOn(LouvorDao.prototype, 'delete').and.returnValue(Promise.resolve());
 
       callApi('aa5')
         .end((err: Error, res: Response) => {
@@ -315,8 +265,8 @@ describe('Project Routes', () => {
     it(`should return a JSON object with an error message and a status code of "${BAD_REQUEST}"
             if the request was unsuccessful.`, (done) => {
 
-      const deleteErrMsg = 'Could not delete project.';
-      spyOn(ProjectDao.prototype, 'delete').and.throwError(deleteErrMsg);
+      const deleteErrMsg = 'Could not delete louvor.';
+      spyOn(LouvorDao.prototype, 'delete').and.throwError(deleteErrMsg);
 
       callApi('aa1')
         .end((err: Error, res: Response) => {

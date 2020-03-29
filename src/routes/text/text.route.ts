@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import { OK } from 'http-status-codes';
 import { defaultConfig, updateConfig, insertNewConfig, validateRecivedConfig } from '../config-router/config.router';
 import { Config } from '../../models/config.model';
+import { TextModel } from '../../models/text.model';
 
 // Init shared
 export const TextRoute = Router();
@@ -9,11 +10,10 @@ export const TextRoute = Router();
 // Init routes
 export const getTextPath = '/';
 
-// TODO: falta o type extendido aqui
-let data = {
+let data = new TextModel({
   ...defaultConfig,
   text: '...',
-};
+});
 
 /******************************************************************************
  *                      Get User Infos - "GET /api/user-info"
@@ -26,22 +26,26 @@ TextRoute.get(getTextPath, async (req: Request, res: Response) => {
  *                      Get User Infos - "GET /api/user-info"
  ******************************************************************************/
 TextRoute.post(getTextPath, async (req: Request, res: Response) => {
-  if ( !validateRecivedConfig(new Config(req.body)) ) {
-    // TODO: deveria dar um new e criar um objeto conforme modelo
-    data.text = req.body.text;
+  const received = new TextModel(req.body);
 
-    return res.status(OK).json({id: req.body.id});
+  if ( !validateRecivedConfig(received) ) {
+    data.text = received.text;
+
+    return res.status(OK).json({id: received.id});
   }
 
   // atualiza ou insere config
-  if (req.body.id) {
+  if (received.id) {
     await updateConfig(req, res);
   } else {
-    req.body.id = await insertNewConfig(req, res);
+    received.id = await insertNewConfig(req, res);
   }
 
-  // TODO: deveria dar um new e criar um objeto conforme modelo
-  data = req.body;
+  if (!received.text) {
+    received.text = data.text;
+  }
 
-  return res.status(OK).json({id: req.body.id});
+  data = received;
+
+  return res.status(OK).json({id: received.id});
 });
