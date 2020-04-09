@@ -14,3 +14,6 @@ src/public
 
 # compiled output
 /dist
+
+# angular
+/angular-controller
