@@ -7,7 +7,6 @@ console.log('iniciando o build...');
 // remove current build, and create new one
 fs.removeSync('./dist/');
 fs.copySync('./src/public', './dist/public');
-fs.copySync('./src/client', './dist/public/client');
 fs.copySync('./angular-controller', './dist/public');
 fs.copySync('./src/views', './dist/views');
 
