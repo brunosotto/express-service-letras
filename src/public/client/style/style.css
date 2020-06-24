@@ -59,4 +59,10 @@ body.end {
   text-transform: uppercase;
   font-style: italic;
   letter-spacing: 0.1rem;
+
+  transition: all 0.5s ease-out;
+  -webkit-transition: all 0.5s ease-out;
+  -moz-transition: all 0.5s ease-out;
+  -o-transition: all 0.5s ease-out;
+  -ms-transition: all 0.5s ease-out;
 }
