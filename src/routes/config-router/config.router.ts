@@ -5,218 +5,228 @@ import { IResponse } from './../../models/response.model';
 import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 
-// Init shared
-const singular = Router();
-const plural = Router();
-const configDao = new ConfigDao();
-export const paramMissingError = 'One or more of the required parameters was missing.';
+export class ConfigRoute {
 
-// Init routes
-export const getConfigsPath = ''; // raíz
-export const getConfigPath = '/:id';
-export const addConfigPath = '';
-export const updateConfigPath = '/:id';
-export const deleteConfigPath = '/:id';
+  private configDao: ConfigDao;
+  public defaultConfig: Config;
+  public paramMissingError = 'One or more of the required parameters was missing.';
+  public singular: Router;
+  public plural: Router;
+  public getConfigsPath: string;
+  public getConfigPath: string;
+  public addConfigPath: string;
+  public updateConfigPath: string;
+  public deleteConfigPath: string;
 
-export const defaultConfig = new Config({
-  top: false,
-  size: 2.5,
-  pad: 1,
-});
+  constructor() {
+    this.singular = Router();
+    this.plural = Router();
+    this.configDao = new ConfigDao();
 
-/******************************************************************************
- *                      Get All Configs - 'GET /api/configs'
- ******************************************************************************/
-plural.get(getConfigsPath, async (req: Request, res: Response) => {
-  try {
-    const configs = await configDao.getAll();
+    this.configure();
+    this.setPluralGet();
+    this.setSingularGet();
+    this.setSingularPost();
+    this.setSingularPut();
+    this.setSingularDelete();
+  }
 
-    if (!configs.length) {
-      configs.push(defaultConfig);
+  private configure(): void {
+    this.defaultConfig = new Config({
+      top: false,
+      size: 2.5,
+      pad: 1,
+    });
+
+    this.getConfigsPath = ''; // raíz
+    this.getConfigPath = '/:id';
+    this.addConfigPath = '';
+    this.updateConfigPath = '/:id';
+    this.deleteConfigPath = '/:id';
+  }
+
+  private setPluralGet(): void {
+    this.plural.get(this.getConfigsPath, async (req: Request, res: Response) => {
+      try {
+        const configs = await this.configDao.getAll();
+
+        if (!configs.length) {
+          configs.push(this.defaultConfig);
+        }
+
+        return res.status(OK).json(configs);
+      } catch (err) {
+        // loga
+        wLogger.error(err.message, err);
+
+        // prepara o responde
+        const response: IResponse = {
+          success: false,
+          message: err.message,
+          type: 'ErrorListConfigs',
+        };
+
+        // retorna
+        return res.status(BAD_REQUEST).json(response);
+      }
+    });
+  }
+
+  private setSingularGet(): void {
+    this.singular.get(this.getConfigPath, async (req: Request, res: Response) => {
+      try {
+        const id = req.params.id;
+        const config = await this.getConfig(id);
+
+        return res.status(OK).json(config);
+      } catch (err) {
+        // loga
+        wLogger.error(err.message, err);
+
+        // prepara o responde
+        const response: IResponse = {
+          success: false,
+          message: err.message,
+          type: 'ErrorGetConfig',
+        };
+
+        // retorna
+        return res.status(BAD_REQUEST).json(response);
+      }
+    });
+  }
+
+  private getConfig(id: string): Promise<Config> {
+    return this.configDao.get(id);
+  }
+
+  public async insertNewConfig(req: Request, res: Response): Promise<string> {
+    try {
+      const config = new Config(req.body);
+
+      // valida os parametros requeridos
+      if (!this.validateRecivedConfig(config)) {
+        throw { message: this.paramMissingError };
+      }
+
+      // grava e já recebe o id
+      const id = await this.configDao.add(config);
+
+      return id;
+    } catch (err) {
+      // loga
+      wLogger.error(err.message, err);
+
+      // prepara o responde
+      const response: IResponse = {
+        success: false,
+        message: err.message,
+        type: 'ErrorAddConfig',
+      };
+
+      // retorna
+      res.status(BAD_REQUEST).json(response);
+      return null;
     }
-
-    return res.status(OK).json(configs);
-  } catch (err) {
-    // loga
-    wLogger.error(err.message, err);
-
-    // prepara o responde
-    const response: IResponse = {
-      success: false,
-      message: err.message,
-      type: 'ErrorListConfigs',
-    };
-
-    // retorna
-    return res.status(BAD_REQUEST).json(response);
   }
-});
 
-/******************************************************************************
- *                      Get One Config - 'GET /api/config/{id}'
- ******************************************************************************/
-singular.get(getConfigPath, async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const config = await getConfig(id);
+  private setSingularPost(): void {
+    this.singular.post(this.addConfigPath, async (req: Request, res: Response) => {
+      const id = await this.insertNewConfig(req, res);
 
-    return res.status(OK).json(config);
-  } catch (err) {
-    // loga
-    wLogger.error(err.message, err);
+      // prepara o responde
+      const response: IResponse = { id, success: true };
 
-    // prepara o responde
-    const response: IResponse = {
-      success: false,
-      message: err.message,
-      type: 'ErrorGetConfig',
-    };
-
-    // retorna
-    return res.status(BAD_REQUEST).json(response);
+      return res.status(CREATED).json(response);
+    });
   }
-});
 
-const getConfig = (id: string) => {
-  return configDao.get(id);
-};
-
-/******************************************************************************
- *                       Add One - 'POST /api/config'
- ******************************************************************************/
-export async function insertNewConfig(req: Request, res: Response): Promise<string> {
-  try {
-    const config = new Config(req.body);
-
-    // valida os parametros requeridos
-    if (!validateRecivedConfig(config)) {
-      throw { message: paramMissingError };
+  public validateRecivedConfig(config: Config): boolean {
+    if (!config.pad && config.pad !== 0) {
+      return false;
+    } else if (!config.size && config.size !== 0) {
+      return false;
+    } else {
+      return true;
     }
-
-    // grava e já recebe o id
-    const id = await configDao.add(config);
-
-    return id;
-  } catch (err) {
-    // loga
-    wLogger.error(err.message, err);
-
-    // prepara o responde
-    const response: IResponse = {
-      success: false,
-      message: err.message,
-      type: 'ErrorAddConfig',
-    };
-
-    // retorna
-    res.status(BAD_REQUEST).json(response);
-    return null;
   }
-}
-singular.post(addConfigPath, async (req: Request, res: Response) => {
-  const id = await insertNewConfig(req, res);
 
-  // prepara o responde
-  const response: IResponse = { id, success: true };
+  public async updateConfig(req: Request, res: Response): Promise<void> {
+    try {
+      const id = req.params.id || req.body.id;
+      const config = new Config(req.body);
 
-  return res.status(CREATED).json(response);
-});
+      // valida os parametros requeridos
+      if (!this.validateRecivedConfig(config)) {
+        throw { message: this.paramMissingError };
+      }
 
-export function validateRecivedConfig(config: Config): boolean {
-  if (!config.pad && config.pad !== 0) {
-    return false;
-  } else if (!config.size && config.size !== 0) {
-    return false;
-  } else {
-    return true;
-  }
-}
+      // injeta o id
+      config.id = id;
 
-/******************************************************************************
- *                       Update - 'PUT /api/config/{id}'
- ******************************************************************************/
-export async function updateConfig(req: Request, res: Response): Promise<void> {
-  try {
-    const id = req.params.id || req.body.id;
-    const config = new Config(req.body);
+      await this.update(config);
 
-    // valida os parametros requeridos
-    if (!validateRecivedConfig(config)) {
-      throw { message: paramMissingError };
+      // retorna
+      return;
+    } catch (err) {
+      // loga
+      wLogger.error(err.message, err);
+
+      // prepara o responde
+      const response: IResponse = {
+        success: false,
+        message: err.message,
+        type: 'ErrorUpdateConfig',
+      };
+
+      // retorna
+      res.status(BAD_REQUEST).json(response);
+      return;
     }
-
-    // injeta o id
-    config.id = id;
-
-    await update(config);
-
-    // retorna
-    return;
-  } catch (err) {
-    // loga
-    wLogger.error(err.message, err);
-
-    // prepara o responde
-    const response: IResponse = {
-      success: false,
-      message: err.message,
-      type: 'ErrorUpdateConfig',
-    };
-
-    // retorna
-    res.status(BAD_REQUEST).json(response);
-    return;
   }
+
+  private setSingularPut(): void {
+    this.singular.put(this.updateConfigPath, async (req: Request, res: Response) => {
+      await this.updateConfig(req, res);
+
+      // prepara o responde
+      const response: IResponse = { success: true };
+
+      // retorna
+      return res.status(OK).json(response);
+    });
+  }
+
+  private update(config: Config): Promise<void> {
+    return this.configDao.update(config);
+  }
+
+  private setSingularDelete(): void {
+    this.singular.delete(this.deleteConfigPath, async (req: Request, res: Response) => {
+      try {
+        const id = req.params.id;
+        await this.configDao.delete(id);
+
+        // prepara o responde
+        const response: IResponse = { success: true };
+
+        // retorna
+        return res.status(OK).json(response);
+      } catch (err) {
+        // loga
+        wLogger.error(err.message, err);
+
+        // prepara o responde
+        const response: IResponse = {
+          success: false,
+          message: err.message,
+          type: 'ErrorDeleteConfig',
+        };
+
+        // retorna
+        return res.status(BAD_REQUEST).json(response);
+      }
+    });
+  }
+
 }
-singular.put(updateConfigPath, async (req: Request, res: Response) => {
-  await updateConfig(req, res);
-
-  // prepara o responde
-  const response: IResponse = { success: true };
-
-  // retorna
-  return res.status(OK).json(response);
-});
-
-const update = (config: Config) => {
-  return configDao.update(config);
-};
-
-/******************************************************************************
- *                    Delete - 'DELETE /api/config/:id'
- ******************************************************************************/
-singular.delete(deleteConfigPath, async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    await configDao.delete(id);
-
-    // prepara o responde
-    const response: IResponse = { success: true };
-
-    // retorna
-    return res.status(OK).json(response);
-  } catch (err) {
-    // loga
-    wLogger.error(err.message, err);
-
-    // prepara o responde
-    const response: IResponse = {
-      success: false,
-      message: err.message,
-      type: 'ErrorDeleteConfig',
-    };
-
-    // retorna
-    return res.status(BAD_REQUEST).json(response);
-  }
-});
-
-/******************************************************************************
- *                                     Export
- ******************************************************************************/
-export const ConfigRoute = {
-  singular,
-  plural,
-  getConfig,
-  update,
-};

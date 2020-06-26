@@ -24,8 +24,9 @@ export class BaseRouter {
     this.router.use('/louvores', LouvorRoute.plural);
 
     // config
-    this.router.use('/config', ConfigRoute.singular);
-    this.router.use('/configs', ConfigRoute.plural);
+    const configRoute = new ConfigRoute();
+    this.router.use('/config', configRoute.singular);
+    this.router.use('/configs', configRoute.plural);
 
     // text
     const textRoute = new TextRoute(this.app, this.io);

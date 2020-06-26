@@ -1,12 +1,13 @@
 import { Request, Response, Router } from 'express';
 import { OK } from 'http-status-codes';
-import { defaultConfig, updateConfig, insertNewConfig, validateRecivedConfig } from '../config-router/config.router';
+import { ConfigRoute } from '../config-router/config.router';
 import { TextModel } from '../../models/text.model';
 import { Express } from 'express';
 import socketIo from 'socket.io';
 
 export class TextRoute {
   private data: TextModel;
+  private configRoute: ConfigRoute;
   public route: Router;
   public getTextPath = '/';
 
@@ -14,10 +15,13 @@ export class TextRoute {
     private readonly app: Express,
     private readonly io: socketIo.Server,
   ) {
+    // config
+    this.configRoute = new ConfigRoute();
+
     this.route = Router();
 
     this.data = new TextModel({
-      ...defaultConfig,
+      ...this.configRoute.defaultConfig,
       text: '...',
     });
 
@@ -35,7 +39,7 @@ export class TextRoute {
     this.route.post(this.getTextPath, async (req: Request, res: Response) => {
       const received = new TextModel(req.body);
 
-      if (!validateRecivedConfig(received)) {
+      if (!this.configRoute.validateRecivedConfig(received)) {
         this.data.text = received.text;
 
         // avisa o socket
@@ -46,9 +50,9 @@ export class TextRoute {
 
       // atualiza ou insere config
       if (received.id) {
-        await updateConfig(req, res);
+        await this.configRoute.updateConfig(req, res);
       } else {
-        received.id = await insertNewConfig(req, res);
+        received.id = await this.configRoute.insertNewConfig(req, res);
       }
 
       // se não veio textto aproveita o texto que já tinha

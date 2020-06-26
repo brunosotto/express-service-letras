@@ -1,28 +1,23 @@
 import { pErr } from './../../shared/misc';
-import { ConfigDao } from './../../daos/config/config.dao';
+import { ConfigDao } from './../../daos/config-dao/config.dao';
 import { Config, IConfig } from './../../models/config.model';
 import supertest from 'supertest';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { Response, SuperTest, Test } from 'supertest';
-import app from '../../server';
-import {
-  getConfigPath,
-  getConfigsPath,
-  addConfigPath,
-  updateConfigPath,
-  deleteConfigPath,
-  paramMissingError,
-} from './config.route';
+import { app } from '../../start';
+import { ConfigRoute } from './config.router';
+
+const configRoute = new ConfigRoute();
 
 describe('Config Routes', () => {
 
   const configPluralPath = '/api/configs';
   const configSingularPath = '/api/config';
-  const getConfigsFullPath = configPluralPath + getConfigsPath;
-  const getConfigFullPath = configSingularPath + getConfigPath;
-  const addConfigFullPath = configSingularPath + addConfigPath;
-  const updateConfigFullPath = configSingularPath + updateConfigPath;
-  const deleteConfigFullPath = configSingularPath + deleteConfigPath;
+  const getConfigsFullPath = configPluralPath + configRoute.getConfigsPath;
+  const getConfigFullPath = configSingularPath + configRoute.getConfigPath;
+  const addConfigFullPath = configSingularPath + configRoute.addConfigPath;
+  const updateConfigFullPath = configSingularPath + configRoute.updateConfigPath;
+  const deleteConfigFullPath = configSingularPath + configRoute.deleteConfigPath;
 
   let agent: SuperTest<Test>;
 
@@ -43,36 +38,21 @@ describe('Config Routes', () => {
       const configs: Config[] = [
         {
           id: 'aa1',
-          name: 'Configo 1',
-          enable: true,
-          script: 'express',
-          deploymentPath: '/teste/',
-          lastRun: new Date(),
-          deploymentEnvs: [],
-          githubRepoUrl: 'teste.git',
-          authToken: '12334ddss',
+          top: true,
+          size: 2.5,
+          pad: 3,
         },
         {
           id: 'aa2',
-          name: 'Configo 2',
-          enable: true,
-          script: 'express',
-          deploymentPath: '/teste/',
-          lastRun: new Date(),
-          deploymentEnvs: [],
-          githubRepoUrl: 'teste.git',
-          authToken: '12334ddss',
+          top: true,
+          size: 2.5,
+          pad: 3,
         },
         {
           id: 'aa3',
-          name: 'Configo 3',
-          enable: true,
-          script: 'express',
-          deploymentPath: '/teste/',
-          lastRun: new Date(),
-          deploymentEnvs: [],
-          githubRepoUrl: 'teste.git',
-          authToken: '12334ddss',
+          top: true,
+          size: 2.5,
+          pad: 3,
         },
       ];
 
@@ -121,14 +101,9 @@ describe('Config Routes', () => {
 
       const config: Config = {
         id: 'aa1',
-        name: 'Configo 1',
-        enable: true,
-        script: 'express',
-        deploymentPath: '/teste/',
-        lastRun: new Date(),
-        deploymentEnvs: [],
-        githubRepoUrl: 'teste.git',
-        authToken: '12334ddss',
+        top: true,
+        size: 2.5,
+        pad: 3,
       };
 
       spyOn(ConfigDao.prototype, 'get').and.returnValue(Promise.resolve(config));
@@ -170,21 +145,10 @@ describe('Config Routes', () => {
     };
 
     const configData = new Config(
-      'Projeto novo',
+      'aa5',
       true,
-      'express',
-      '/teste/',
-      new Date(),
-      [
-        {
-          name: 'teste',
-          port: 1234,
-          lastDeploy: new Date(),
-          versions: [],
-        },
-      ],
-      'teste.git',
-      '12334ddss',
+      2.5,
+      3,
     );
 
     it(`should return a status code of "${CREATED}" if the request was successful.`, (done) => {
@@ -200,14 +164,14 @@ describe('Config Routes', () => {
         });
     });
 
-    it(`should return a JSON object with an error message of "${paramMissingError}" and a status
+    it(`should return a JSON object with an error message of "${configRoute.paramMissingError}" and a status
             code of "${BAD_REQUEST}" if the config param was missing.`, (done) => {
 
       callApi({})
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(BAD_REQUEST);
-          expect(res.body.message).toBe(paramMissingError);
+          expect(res.body.message).toBe(configRoute.paramMissingError);
           done();
         });
     });
@@ -235,21 +199,10 @@ describe('Config Routes', () => {
     };
 
     const configData = new Config(
-      'Projeto novo',
+      'aa7',
       true,
-      'express',
-      '/teste/',
-      new Date(),
-      [
-        {
-          name: 'teste',
-          port: 1234,
-          lastDeploy: new Date(),
-          versions: [],
-        },
-      ],
-      'teste.git',
-      '12334ddss',
+      2.5,
+      3,
     );
 
     it(`should return a status code of "${OK}" if the request was successful.`, (done) => {
@@ -265,14 +218,14 @@ describe('Config Routes', () => {
         });
     });
 
-    it(`should return a JSON object with an error message of "${paramMissingError}" and a
+    it(`should return a JSON object with an error message of "${configRoute.paramMissingError}" and a
             status code of "${BAD_REQUEST}" if the config param was missing.`, (done) => {
 
       callApi('aa2', {})
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(BAD_REQUEST);
-          expect(res.body.message).toBe(paramMissingError);
+          expect(res.body.message).toBe(configRoute.paramMissingError);
           done();
         });
     });
