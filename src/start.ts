@@ -1,13 +1,5 @@
-import { logger } from './shared/logger';
-import app from './server';
+import { AppServer } from './server';
 
-// verifica a porta que vai subir
-const port = Number(process.env.PORT || 3000);
+const app = new AppServer().app;
 
-// guarda a porta atual
-app.set('listenOnPort', port);
-
-// Start the server
-app.listen(port, () => {
-    logger.info('Express server started on port: ' + port);
-});
+export { app };

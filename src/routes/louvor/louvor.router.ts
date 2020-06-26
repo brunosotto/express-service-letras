@@ -1,4 +1,4 @@
-import { logger } from './../../shared/logger';
+import { wLogger } from './../../shared/logger';
 import { LouvorDao } from './../../daos/louvor/louvor.dao';
 import { Louvor } from './../../models/louvor.model';
 import { IResponse } from './../../models/response.model';
@@ -28,7 +28,7 @@ plural.get(getLouvoresPath, async (req: Request, res: Response) => {
     return res.status(OK).json(louvores);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = { success: false, message: err.message, type: 'ErrorListLouvores' };
@@ -49,7 +49,7 @@ singular.get(getLouvorPath, async (req: Request, res: Response) => {
     return res.status(OK).json(louvor);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = { success: false, message: err.message, type: 'ErrorGetLouvor' };
@@ -84,7 +84,7 @@ singular.post(addLouvorPath, async (req: Request, res: Response) => {
     return res.status(CREATED).json(response);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = { success: false, message: err.message, type: 'ErrorAddLouvor' };
@@ -129,7 +129,7 @@ singular.put(updateLouvorPath, async (req: Request, res: Response) => {
     return res.status(OK).json(response);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = { success: false, message: err.message, type: 'ErrorUpdateLouvor' };
@@ -158,7 +158,7 @@ singular.delete(deleteLouvorPath, async (req: Request, res: Response) => {
     return res.status(OK).json(response);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = { success: false, message: err.message, type: 'ErrorDeleteLouvor' };

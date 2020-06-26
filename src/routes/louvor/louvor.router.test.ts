@@ -4,7 +4,7 @@ import { Louvor, ILouvor } from './../../models/louvor.model';
 import supertest from 'supertest';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { Response, SuperTest, Test } from 'supertest';
-import app from '../../server';
+import { app } from '../../start';
 import {
   getLouvorPath,
   getLouvoresPath,
@@ -12,7 +12,7 @@ import {
   updateLouvorPath,
   deleteLouvorPath,
   paramMissingError,
-} from './louvor.route';
+} from './louvor.router';
 
 describe('Louvor Routes', () => {
 
@@ -45,16 +45,19 @@ describe('Louvor Routes', () => {
           id: 'aa1',
           name: 'Louvoro 1',
           text: '12334ddss',
+          arr: [],
         },
         {
           id: 'aa2',
           name: 'Louvoro 2',
           text: '12334ddss',
+          arr: [],
         },
         {
           id: 'aa3',
           name: 'Louvoro 3',
           text: '12334ddss',
+          arr: [],
         },
       ];
 
@@ -105,6 +108,7 @@ describe('Louvor Routes', () => {
         id: 'aa1',
         name: 'Louvoro 1',
         text: '12334ddss',
+        arr: [],
       };
 
       spyOn(LouvorDao.prototype, 'get').and.returnValue(Promise.resolve(louvor));

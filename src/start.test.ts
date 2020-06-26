@@ -1,4 +1,4 @@
-import { logger } from './shared/logger';
+import { wLogger } from './shared/logger';
 import find from 'find';
 import Jasmine from 'jasmine';
 
@@ -18,9 +18,9 @@ jasmine.loadConfig({
 // On complete callback function
 jasmine.onComplete((passed: boolean) => {
     if (passed) {
-        logger.info('All tests have passed :)');
+        wLogger.info('All tests have passed :)');
     } else {
-        logger.error('At least one test has failed :(');
+        wLogger.error('At least one test has failed :(');
     }
 });
 
@@ -31,7 +31,7 @@ if (process.argv[3]) {
         if (files.length === 1) {
             jasmine.execute([files[0]], testFile);
         } else {
-            logger.error('Test file not found!');
+            wLogger.error('Test file not found!');
         }
     });
 } else {

@@ -1,4 +1,4 @@
-import { logger } from './../../shared/logger';
+import { wLogger } from './../../shared/logger';
 import { ConfigDao } from './../../daos/config-dao/config.dao';
 import { Config } from './../../models/config.model';
 import { IResponse } from './../../models/response.model';
@@ -38,7 +38,7 @@ plural.get(getConfigsPath, async (req: Request, res: Response) => {
     return res.status(OK).json(configs);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = {
@@ -63,7 +63,7 @@ singular.get(getConfigPath, async (req: Request, res: Response) => {
     return res.status(OK).json(config);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = {
@@ -99,7 +99,7 @@ export async function insertNewConfig(req: Request, res: Response): Promise<stri
     return id;
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = {
@@ -154,7 +154,7 @@ export async function updateConfig(req: Request, res: Response): Promise<void> {
     return;
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = {
@@ -197,7 +197,7 @@ singular.delete(deleteConfigPath, async (req: Request, res: Response) => {
     return res.status(OK).json(response);
   } catch (err) {
     // loga
-    logger.error(err.message, err);
+    wLogger.error(err.message, err);
 
     // prepara o responde
     const response: IResponse = {

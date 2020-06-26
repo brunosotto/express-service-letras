@@ -1,32 +1,45 @@
 import { Request, Response, Router } from 'express';
-import { LouvorRoute } from './louvor/louvor.route';
+import { LouvorRoute } from './louvor/louvor.router';
 import { ConfigRoute } from './config-router/config.router';
-import { TextRoute } from './text/text.route';
+import { TextRoute } from './text/text.router';
 import { NOT_FOUND } from 'http-status-codes';
+import { Express } from 'express';
+import socketIo from 'socket.io';
 
-// Init router and path
-const router = Router();
+export class BaseRouter {
+  public router: Router;
 
-// Add sub-routes
-// project
-router.use('/louvor', LouvorRoute.singular);
-router.use('/louvores', LouvorRoute.plural);
+  constructor(
+    private readonly app: Express,
+    private readonly io: socketIo.Server,
+  ) {
+    this.router = Router();
+    this.configureRoutes();
+    this.configure404();
+  }
 
-// project
-router.use('/config', ConfigRoute.singular);
-router.use('/configs', ConfigRoute.plural);
+  private configureRoutes(): void {
+    // louvor
+    this.router.use('/louvor', LouvorRoute.singular);
+    this.router.use('/louvores', LouvorRoute.plural);
 
-// text
-router.use('/text', TextRoute);
+    // config
+    this.router.use('/config', ConfigRoute.singular);
+    this.router.use('/configs', ConfigRoute.plural);
 
-// 404 default
-router.all('/*', (req: Request, res: Response) => {
-  return res.status(NOT_FOUND).json({
-    statusCode: 404,
-    error: 'Not Found',
-    message: 'Not Found',
-  });
-});
+    // text
+    const textRoute = new TextRoute(this.app, this.io);
+    this.router.use('/text', textRoute.route);
+  }
 
-// Export the base-router
-export default router;
+  private configure404(): void {
+    // 404 default
+    this.router.all('/*', (req: Request, res: Response) => {
+      return res.status(NOT_FOUND).json({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      });
+    });
+  }
+}
