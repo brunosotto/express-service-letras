@@ -20,8 +20,9 @@ export class BaseRouter {
 
   private configureRoutes(): void {
     // louvor
-    this.router.use('/louvor', LouvorRoute.singular);
-    this.router.use('/louvores', LouvorRoute.plural);
+    const louvorRoute = new LouvorRoute();
+    this.router.use('/louvor', louvorRoute.singular);
+    this.router.use('/louvores', louvorRoute.plural);
 
     // config
     const configRoute = new ConfigRoute();

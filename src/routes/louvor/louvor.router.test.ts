@@ -5,24 +5,19 @@ import supertest from 'supertest';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { Response, SuperTest, Test } from 'supertest';
 import { app } from '../../start';
-import {
-  getLouvorPath,
-  getLouvoresPath,
-  addLouvorPath,
-  updateLouvorPath,
-  deleteLouvorPath,
-  paramMissingError,
-} from './louvor.router';
+import { LouvorRoute } from './louvor.router';
+
+const louvorRoute = new LouvorRoute();
 
 describe('Louvor Routes', () => {
 
   const louvorPluralPath = '/api/louvores';
   const louvorSingularPath = '/api/louvor';
-  const getLouvoresFullPath = louvorPluralPath + getLouvoresPath;
-  const getLouvorFullPath = louvorSingularPath + getLouvorPath;
-  const addLouvorFullPath = louvorSingularPath + addLouvorPath;
-  const updateLouvorFullPath = louvorSingularPath + updateLouvorPath;
-  const deleteLouvorFullPath = louvorSingularPath + deleteLouvorPath;
+  const getLouvoresFullPath = louvorPluralPath + louvorRoute.getLouvoresPath;
+  const getLouvorFullPath = louvorSingularPath + louvorRoute.getLouvorPath;
+  const addLouvorFullPath = louvorSingularPath + louvorRoute.addLouvorPath;
+  const updateLouvorFullPath = louvorSingularPath + louvorRoute.updateLouvorPath;
+  const deleteLouvorFullPath = louvorSingularPath + louvorRoute.deleteLouvorPath;
 
   let agent: SuperTest<Test>;
 
@@ -167,14 +162,14 @@ describe('Louvor Routes', () => {
         });
     });
 
-    it(`should return a JSON object with an error message of "${paramMissingError}" and a status
+    it(`should return a JSON object with an error message of "${louvorRoute.paramMissingError}" and a status
             code of "${BAD_REQUEST}" if the louvor param was missing.`, (done) => {
 
       callApi({})
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(BAD_REQUEST);
-          expect(res.body.message).toBe(paramMissingError);
+          expect(res.body.message).toBe(louvorRoute.paramMissingError);
           done();
         });
     });
@@ -219,14 +214,14 @@ describe('Louvor Routes', () => {
         });
     });
 
-    it(`should return a JSON object with an error message of "${paramMissingError}" and a
+    it(`should return a JSON object with an error message of "${louvorRoute.paramMissingError}" and a
             status code of "${BAD_REQUEST}" if the louvor param was missing.`, (done) => {
 
       callApi('aa2', {})
         .end((err: Error, res: Response) => {
           pErr(err);
           expect(res.status).toBe(BAD_REQUEST);
-          expect(res.body.message).toBe(paramMissingError);
+          expect(res.body.message).toBe(louvorRoute.paramMissingError);
           done();
         });
     });
