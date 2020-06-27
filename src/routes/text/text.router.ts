@@ -4,6 +4,7 @@ import { ConfigRoute } from '../config-router/config.router';
 import { TextModel } from '../../models/text.model';
 import { Express } from 'express';
 import socketIo from 'socket.io';
+import { wLogger } from 'src/shared/logger';
 
 export class TextRoute {
   private data: TextModel;
@@ -20,13 +21,17 @@ export class TextRoute {
 
     this.route = Router();
 
-    this.data = new TextModel({
-      ...this.configRoute.defaultConfig,
-      text: '...',
-    });
-
+    this.setData();
     this.configureGet();
     this.setRoutePost();
+  }
+
+  private async setData(): Promise<void> {
+    const config = await this.configRoute.getFirstConfig();
+    this.data = new TextModel({
+      ...config,
+      text: '...',
+    });
   }
 
   private configureGet(): void {
