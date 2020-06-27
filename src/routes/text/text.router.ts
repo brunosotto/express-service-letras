@@ -26,7 +26,7 @@ export class TextRoute {
     });
 
     this.configureGet();
-    this.configurePost();
+    this.setRoutePost();
   }
 
   private configureGet(): void {
@@ -35,35 +35,40 @@ export class TextRoute {
     });
   }
 
-  private configurePost(): void {
-    this.route.post(this.getTextPath, async (req: Request, res: Response) => {
-      const received = new TextModel(req.body);
+  private setRoutePost(): void {
+    this.route.post(this.getTextPath, async (req: Request, res: Response) => this.postText(req, res));
+  }
 
-      if (!this.configRoute.validateRecivedConfig(received)) {
-        this.data.text = received.text;
+  private async postText(req: Request, res: Response): Promise<Response> {
+    const received = new TextModel(req.body);
 
-        // avisa o socket
-        this.io.sockets.emit('data-show', this.data);
+    if (!this.configRoute.validateRecivedConfig(received)) {
+      this.data.text = received.text;
 
-        return res.status(OK).json({ id: received.id });
-      }
-
-      // atualiza ou insere config
-      if (received.id) {
-        await this.configRoute.updateConfig(req, res);
-      } else {
-        received.id = await this.configRoute.insertNewConfig(req, res);
-      }
-
-      // se não veio textto aproveita o texto que já tinha
-      if (!received.text) {
-        received.text = this.data.text;
-      }
-
-      // dados atualizados
-      this.data = received;
+      // avisa o socket
+      this.io.sockets.emit('data-show', this.data);
 
       return res.status(OK).json({ id: received.id });
-    });
+    }
+
+    // atualiza ou insere config
+    if (received.id) {
+      await this.configRoute.updateConfig(req, res);
+    } else {
+      received.id = await this.configRoute.insertNewConfig(req, res);
+    }
+
+    // se não veio textto aproveita o texto que já tinha
+    if (!received.text) {
+      received.text = this.data.text;
+    }
+
+    // dados atualizados
+    this.data = received;
+
+    // avisa o socket
+    this.io.sockets.emit('data-show', this.data);
+
+    return res.status(OK).json({ id: received.id });
   }
 }

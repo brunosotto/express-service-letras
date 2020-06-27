@@ -39,76 +39,82 @@ export class LouvorRoute {
   }
 
   private setPluralGet(): void {
-    this.plural.get(this.getLouvoresPath, async (req: Request, res: Response) => {
-      try {
-        const louvores = await this.louvorDao.getAll();
+    this.plural.get(this.getLouvoresPath, async (req: Request, res: Response) => this.listLouvor(req, res));
+  }
 
-        return res.status(OK).json(louvores);
-      } catch (err) {
-        // loga
-        wLogger.error(err.message, err);
+  private async listLouvor(req: Request, res: Response): Promise<Response> {
+    try {
+      const louvores = await this.louvorDao.getAll();
 
-        // prepara o responde
-        const response: IResponse = { success: false, message: err.message, type: 'ErrorListLouvores' };
+      return res.status(OK).json(louvores);
+    } catch (err) {
+      // loga
+      wLogger.error(err.message, err);
 
-        // retorna
-        return res.status(BAD_REQUEST).json(response);
-      }
-    });
+      // prepara o responde
+      const response: IResponse = { success: false, message: err.message, type: 'ErrorListLouvores' };
+
+      // retorna
+      return res.status(BAD_REQUEST).json(response);
+    }
   }
 
   private setSingularGet(): void {
-    this.singular.get(this.getLouvorPath, async (req: Request, res: Response) => {
-      try {
-        const id = req.params.id;
-        const louvor = await this.getLouvor(id);
-
-        return res.status(OK).json(louvor);
-      } catch (err) {
-        // loga
-        wLogger.error(err.message, err);
-
-        // prepara o responde
-        const response: IResponse = { success: false, message: err.message, type: 'ErrorGetLouvor' };
-
-        // retorna
-        return res.status(BAD_REQUEST).json(response);
-      }
-    });
+    this.singular.get(this.getLouvorPath, async (req: Request, res: Response) => this.getLouvor(req, res));
   }
 
-  private getLouvor(id: string): Promise<Louvor> {
+  private async getLouvor(req: Request, res: Response): Promise<Response> {
+    try {
+      const id = req.params.id;
+      const louvor = await this.getLouvorById(id);
+
+      return res.status(OK).json(louvor);
+    } catch (err) {
+      // loga
+      wLogger.error(err.message, err);
+
+      // prepara o responde
+      const response: IResponse = { success: false, message: err.message, type: 'ErrorGetLouvor' };
+
+      // retorna
+      return res.status(BAD_REQUEST).json(response);
+    }
+  }
+
+  private getLouvorById(id: string): Promise<Louvor> {
     return this.louvorDao.get(id);
   }
 
   private setSingularPost(): void {
-    this.singular.post(this.addLouvorPath, async (req: Request, res: Response) => {
-      try {
-        const louvor = new Louvor(req.body);
+    this.singular.post(this.addLouvorPath, async (req: Request, res: Response) => this.insereLouvor(req, res));
+  }
 
-        // valida os parametros requeridos
-        if (!this.validateRecivedLouvor(louvor)) {
-          throw { message: this.paramMissingError };
-        }
+  private async insereLouvor(req: Request, res: Response): Promise<Response> {
+    try {
+      const louvor = new Louvor(req.body);
 
-        // grava e já recebe o id
-        const id = await this.louvorDao.add(louvor);
-
-        // prepara o responde
-        const response: IResponse = { id, success: true };
-
-        return res.status(CREATED).json(response);
-      } catch (err) {
-        // loga
-        wLogger.error(err.message, err);
-
-        // prepara o responde
-        const response: IResponse = { success: false, message: err.message, type: 'ErrorAddLouvor' };
-
-        // retorna
-        return res.status(BAD_REQUEST).json(response);
+      // valida os parametros requeridos
+      if (!this.validateRecivedLouvor(louvor)) {
+        throw { message: this.paramMissingError };
       }
-    });
+
+      // grava e já recebe o id
+      const id = await this.louvorDao.add(louvor);
+
+      // prepara o responde
+      const response: IResponse = { id, success: true };
+
+      return res.status(CREATED).json(response);
+    } catch (err) {
+      // loga
+      wLogger.error(err.message, err);
+
+      // prepara o responde
+      const response: IResponse = { success: false, message: err.message, type: 'ErrorAddLouvor' };
+
+      // retorna
+      return res.status(BAD_REQUEST).json(response);
+    }
   }
 
   private validateRecivedLouvor(louvor: Louvor): boolean {
@@ -122,37 +128,39 @@ export class LouvorRoute {
   }
 
   private setSingularPut(): void {
-    this.singular.put(this.updateLouvorPath, async (req: Request, res: Response) => {
-      try {
-        const id = req.params.id;
-        const louvor = new Louvor(req.body);
+    this.singular.put(this.updateLouvorPath, async (req: Request, res: Response) => this.alteraLouvor(req, res));
+  }
 
-        // valida os parametros requeridos
-        if (!this.validateRecivedLouvor(louvor)) {
-          throw { message: this.paramMissingError };
-        }
+  private async alteraLouvor(req: Request, res: Response): Promise<Response> {
+    try {
+      const id = req.params.id;
+      const louvor = new Louvor(req.body);
 
-        // injeta o id
-        louvor.id = id;
-
-        await this.updateLouvor(louvor);
-
-        // prepara o responde
-        const response: IResponse = { success: true };
-
-        // retorna
-        return res.status(OK).json(response);
-      } catch (err) {
-        // loga
-        wLogger.error(err.message, err);
-
-        // prepara o responde
-        const response: IResponse = { success: false, message: err.message, type: 'ErrorUpdateLouvor' };
-
-        // retorna
-        return res.status(BAD_REQUEST).json(response);
+      // valida os parametros requeridos
+      if (!this.validateRecivedLouvor(louvor)) {
+        throw { message: this.paramMissingError };
       }
-    });
+
+      // injeta o id
+      louvor.id = id;
+
+      await this.updateLouvor(louvor);
+
+      // prepara o responde
+      const response: IResponse = { success: true };
+
+      // retorna
+      return res.status(OK).json(response);
+    } catch (err) {
+      // loga
+      wLogger.error(err.message, err);
+
+      // prepara o responde
+      const response: IResponse = { success: false, message: err.message, type: 'ErrorUpdateLouvor' };
+
+      // retorna
+      return res.status(BAD_REQUEST).json(response);
+    }
   }
 
   private updateLouvor(louvor: Louvor): Promise<void> {
@@ -160,27 +168,29 @@ export class LouvorRoute {
   }
 
   private setSingularDelete(): void {
-    this.singular.delete(this.deleteLouvorPath, async (req: Request, res: Response) => {
-      try {
-        const id = req.params.id;
-        await this.louvorDao.delete(id);
+    this.singular.delete(this.deleteLouvorPath, async (req: Request, res: Response) => this.excluiLouvor(req, res));
+  }
 
-        // prepara o responde
-        const response: IResponse = { success: true };
+  private async excluiLouvor(req: Request, res: Response): Promise<Response> {
+    try {
+      const id = req.params.id;
+      await this.louvorDao.delete(id);
 
-        // retorna
-        return res.status(OK).json(response);
-      } catch (err) {
-        // loga
-        wLogger.error(err.message, err);
+      // prepara o responde
+      const response: IResponse = { success: true };
 
-        // prepara o responde
-        const response: IResponse = { success: false, message: err.message, type: 'ErrorDeleteLouvor' };
+      // retorna
+      return res.status(OK).json(response);
+    } catch (err) {
+      // loga
+      wLogger.error(err.message, err);
 
-        // retorna
-        return res.status(BAD_REQUEST).json(response);
-      }
-    });
+      // prepara o responde
+      const response: IResponse = { success: false, message: err.message, type: 'ErrorDeleteLouvor' };
+
+      // retorna
+      return res.status(BAD_REQUEST).json(response);
+    }
   }
 
 }
