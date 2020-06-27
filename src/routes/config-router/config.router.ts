@@ -4,7 +4,6 @@ import { Config } from './../../models/config.model';
 import { IResponse } from './../../models/response.model';
 import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
-import { Console } from 'console';
 
 export class ConfigRoute {
 
