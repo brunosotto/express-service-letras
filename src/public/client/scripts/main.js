@@ -7,12 +7,12 @@ var animabanners = (function ($) {
 
         // tamanho do texto
         if (data.size) {
-            $("#message").css("font-size", data.size + "rem");
+            $("#message").css("font-size", data.size + "em");
         }
 
         // pad
         if (data.pad) {
-            $("#message").css("padding", data.pad + "rem 0");
+            $("#message").css("padding", data.pad + "em 0");
         }
 
         // topo ou base
@@ -28,7 +28,7 @@ var animabanners = (function ($) {
         //     $.get("../api/text", show);
         // }, 300);
 
-        var socket = io('http://localhost:3000');
+        var socket = io(window.location.origin);
         socket.on('connect', function(){ console.log('connect'); });
         socket.on('data-show', show);
         socket.on('disconnect', function(){ console.log('disconnect'); });
