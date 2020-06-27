@@ -32,6 +32,9 @@ export class TextRoute {
       ...config,
       text: '...',
     });
+
+    // avisa o socket
+    this.avisaSocket();
   }
 
   private configureGet(): void {
@@ -51,7 +54,7 @@ export class TextRoute {
       this.data.text = received.text;
 
       // avisa o socket
-      this.io.sockets.emit('data-show', this.data);
+      this.avisaSocket();
 
       return res.status(OK).json({ id: received.id });
     }
@@ -72,8 +75,13 @@ export class TextRoute {
     this.data = received;
 
     // avisa o socket
-    this.io.sockets.emit('data-show', this.data);
+    this.avisaSocket();
 
     return res.status(OK).json({ id: received.id });
+  }
+
+  private avisaSocket(): void {
+    this.app.set('data-show', this.data);
+    this.io.sockets.emit('data-show', this.data);
   }
 }

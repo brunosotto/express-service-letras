@@ -65,6 +65,12 @@ export class AppServer {
         this.io.on(SocketEvent.CONNECT, (socket: socketIo.Socket) => {
             wLogger.info('Connected client with id: ' + socket.client.id);
 
+            // emite lastData
+            const lastData = this.app.get('data-show');
+            if (lastData) {
+                socket.emit('data-show', lastData);
+            }
+
             socket.on(SocketEvent.DISCONNECT, () => {
                 wLogger.info('Client disconnected: ' + socket.client.id);
             });
