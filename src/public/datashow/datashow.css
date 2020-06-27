@@ -1,4 +1,6 @@
-body {
+body{
+  background-color: black;
+  font-size: 21px;
   display: flex;
   flex: 1 1 100%;
   height: 100vh;
@@ -6,7 +8,6 @@ body {
   box-sizing: border-box;
   flex-direction: row;
   justify-content: center;
-  background-color: black;
 }
 
 body.end {
@@ -14,6 +15,14 @@ body.end {
 }
 
 #message {
+  position: fixed;
+  align-self: center;
+  justify-self: center;
+  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  padding-left: 1.5em!important;
+  padding-right: 1.5em!important;
+  box-sizing: border-box;
   text-align: center;
   text-shadow:
     3px 2px 0 #000,
@@ -60,4 +69,12 @@ body.end {
   text-transform: uppercase;
   font-style: italic;
   letter-spacing: 0.1rem;
+}
+
+#myVideo {
+  position: fixed;
+  min-width: 100vw;
+  min-height: 100vh;
+  align-self: center;
+  justify-self: center;
 }
