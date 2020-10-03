@@ -9,6 +9,7 @@ import { createServer, Server } from 'http';
 import { wLogger } from './shared/logger';
 import { SocketEvent } from './constants';
 import { Express } from 'express';
+import open from 'open';
 import cors from 'cors';
 
 export class AppServer {
@@ -60,6 +61,7 @@ export class AppServer {
     private listen(): void {
         this.server.listen(this.port, () => {
             wLogger.info('Express server started on port: ' + this.port);
+            open(`http://localhost:${this.port}`);
         });
 
         this.io.on(SocketEvent.CONNECT, (socket: socketIo.Socket) => {
