@@ -13,4 +13,4 @@ node_modules/
 /dist
 
 # angular
-/angular-controller
+/src/public/controller
